@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem de Analiza in Agricultura</title>
+    <style>
+        /* ... (toate stilurile CSS raman exact la fel ca in raspunsul anterior) ... */
+        body { font-family: Arial, sans-serif; background-image: url('/static/background.jpg'); background-size: cover; background-position: center center; background-repeat: no-repeat; background-attachment: fixed; margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 700px; margin: 20px auto; background-color: rgba(255, 255, 255, 0.92); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        h1 {
+        text-align: center; /* Pastram centrarea */
+        color: white;       /* Culoarea alba dorita */
+        text-shadow: 2px 2px 4px #000000; /* Umbra neagra pentru lizibilitate */
+        }
+        h2 {
+            text-align: center; /* Pastram centrarea */
+            color: #0056b3;    /* Pastram culoarea albastra originala pentru subtitluri */
+        }
+        .controls, .servo-controls { text-align: center; margin-bottom: 20px; padding: 10px 0; display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap; }
+        button, input, select { padding: 12px 20px; margin: 5px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
+        button { font-weight: bold; transition: all 0.3s ease; color: white; }
+        button.start { background-color: #28a745; }
+        button.start:hover { background-color: #218838; }
+        button.stop { background-color: #dc3545; }
+        button.stop:hover { background-color: #c82333; }
+        button.classify { background-color: #007bff; }
+        button.classify:hover { background-color: #0056b3; }
+        button.servo-action {
+        background-color: #ffc107; color: #333; border-color: #ffc107;}
+        button.servo-action:hover {background-color: #e0a800; /* Culoarea la hover ramane la fel */}
+        img#videoStream, img#snapshotImage { display: block; width: 100%; max-width: 640px; height: auto; margin: 10px auto; border: 3px solid #ddd; border-radius: 8px; background-color: #eee; min-height: 240px; }
+        #snapshot-container { display: none; }
+        .status-msg { text-align: center; margin-top: 15px; font-weight: bold; min-height: 24px; padding: 10px; border-radius: 5px; }
+        .error { color: #721c24; background-color: #f8d7da; }
+        .success { color: #155724; background-color: #d4edda; }
+        .info { color: #0c5460; background-color: #d1ecf1; }
+        label { margin-right: 5px; font-weight: bold; }
+        input[type=number] { width: 80px; }
+    </style>
+</head>
+<body>
+
+    <h1>Sistem de Analiza in Agricultura</h1>
+
+    <div class="container">
+        <h2>Panou de Control Video</h2>
+        <div class="controls">
+            <button class="start" onclick="startVideo()">Porneste Video</button>
+            <button class="stop" onclick="stopProcessing()">Opreste Video</button>
+        </div>
+        <div id="status" class="status-msg info">Sistem inactiv</div>
+    </div>
+
+    <div class="container">
+        <h2>Stream Video (Detecție Live)</h2>
+        <div id="video-container">
+            <img id="videoStream" alt="Stream video oprit.">
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Control Servo Pan/Tilt</h2>
+        <div class="servo-controls">
+            <label for="angleInput">Unghi:</label>
+            <input type="number" id="angleInput" name="angle" min="0" max="180" value="90">
+            <label for="servoSelect">Servo:</label>
+            <select id="servoSelect" name="servo">
+                <option value="pan">Pan (Orizontal)</option>
+                <option value="tilt">Tilt (Vertical)</option>
+            </select>
+            <button class="servo-action" onclick="setServoAngle()">Setează Unghi</button>
+        </div>
+        <div id="servoStatus" class="status-msg info">Asteptare comanda servo...</div>
+    </div>
+
+    <div class="container">
+        <h2>Clasificare la Cerere</h2>
+        <div class="controls">
+            <button class="classify" onclick="classifySnapshot()">Realizeaza Snapshot si Clasifica</button>
+        </div>
+        <div id="snapshot-container">
+            <h3>Ultimul Snapshot Analizat:</h3>
+            <img id="snapshotImage" alt="Snapshot-ul va aparea aici.">
+            <div id="classificationResult" class="status-msg info">Niciun rezultat</div>
+        </div>
+    </div>
+
+    <script>
+        // Declaratii elemente
+        const videoElement = document.getElementById('videoStream');
+        const statusElement = document.getElementById('status');
+        const classificationResultElement = document.getElementById('classificationResult');
+        const snapshotImageElement = document.getElementById('snapshotImage');
+        const snapshotContainer = document.getElementById('snapshot-container');
+        // --- DECLARATII PENTRU SERVO, ADUSE INAPOI ---
+        const servoStatusElement = document.getElementById('servoStatus');
+        const angleInputElement = document.getElementById('angleInput');
+        const servoSelectElement = document.getElementById('servoSelect');
+
+        // Functie helper pentru afisat status
+        function showStatus(element, message, type = 'info') {
+            element.className = `status-msg ${type}`;
+            element.textContent = message;
+        }
+
+        // Functii pentru control video si clasificare (raman la fel)
+        function startVideo() {
+            showStatus(statusElement, 'Activare mod Detecție...', 'info');
+            fetch('/start_detection', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    showStatus(statusElement, 'Mod Detecție Pornit. Încărcare video...', 'info');
+                    videoElement.src = '/video_feed?' + new Date().getTime(); 
+                    videoElement.onload = () => showStatus(statusElement, 'Stream Detecție Activ.', 'success');
+                    videoElement.onerror = () => showStatus(statusElement, 'Eroare la încărcarea stream-ului video.', 'error');
+                });
+        }
+
+        function stopProcessing() {
+            showStatus(statusElement, 'Oprire procesare...', 'info');
+            fetch('/stop_processing', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    videoElement.src = '';
+                    showStatus(statusElement, 'Sistem inactiv. Camera a fost oprita.', 'success');
+                    snapshotContainer.style.display = 'none';
+                });
+        }
+
+        function classifySnapshot() {
+            showStatus(classificationResultElement, 'Captură și clasificare în curs...', 'info');
+            snapshotContainer.style.display = 'block';
+            fetch('/classify_snapshot')
+                .then(response => response.json())
+                .then(data => {
+                    const messageType = data.result.toLowerCase().includes('eroare') ? 'error' : 'success';
+                    showStatus(classificationResultElement, data.result, messageType);
+                    if (data.image_uri) {
+                        snapshotImageElement.src = data.image_uri;
+                    } else {
+                        snapshotImageElement.src = '';
+                    }
+                })
+                .catch(error => {
+                    showStatus(classificationResultElement, `Eroare: ${error.message}`, 'error');
+                });
+        }
+        
+        // --- FUNCTIA PENTRU SERVO, ADUSA INAPOI ---
+        function setServoAngle() {
+            const angle = angleInputElement.value;
+            const servo = servoSelectElement.value;
+            const angleNum = parseInt(angle);
+
+            if (isNaN(angleNum) || angleNum < 0 || angleNum > 180) {
+                showStatus(servoStatusElement, 'Eroare: Unghiul trebuie sa fie intre 0 si 180.', 'error');
+                return;
+            }
+
+            showStatus(servoStatusElement, `Trimitere comanda: ${servo} la ${angleNum}°...`, 'info');
+            
+            fetch('/set_servo', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ servo: servo, angle: angleNum }) 
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => { throw new Error(errData.message || `Eroare HTTP: ${response.status}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                showStatus(servoStatusElement, data.message || 'Comanda executata cu succes.', 'success');
+            })
+            .catch(error => {
+                showStatus(servoStatusElement, `Eroare: ${error.message || 'Comanda servo a esuat.'}`, 'error');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+description: Ultralytics YOLO11n model trained on /content/datasets/pests-auto-dataset-3/data.yaml
+author: Ultralytics
+date: '2025-02-18T17:13:16.697749'
+version: 8.3.57
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: ant
+  1: beetle
+  2: caterpillar
+  3: earwig
+  4: grasshopper
+  5: slug
+  6: snail
+  7: wasp
+  8: weevil
+args:
+  batch: 1
+  half: false
