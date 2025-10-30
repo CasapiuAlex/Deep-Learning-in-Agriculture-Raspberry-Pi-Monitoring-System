@@ -4,8 +4,7 @@
 
 This repository contains the bachelor's thesis project "Deep Learning in Agriculture: Raspberry Pi System for Pest Detection and Plant Disease Classification." The project consists of an autonomous, integrated system that uses two artificial intelligence models for real-time monitoring of crop health.
 
-![Web Interface Demo](images/web_ui.gif)
-<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/3d8e8651-5b07-4958-a75c-464f3d31b467" />
+<img width="800" height="400" alt="Web interface" src="assets/interfata_web.png" />
 
 ## Table of Contents
 
@@ -44,7 +43,7 @@ The physical assembly is designed for autonomous operation and precise control.
 -   **Movement Mechanism:** 3D-printed Pan-Tilt mount with two servo motors (SG90).
 -   **Control & Power:** A custom PCB manages the servo motors, which are powered by a dedicated external power supply to ensure system stability.
 
-<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/a9e2cb91-8755-491f-b69d-17e553159b79" />
+<img width="400" height="200" alt="image" src="assets/project.png" />
 
 ### Software
 
@@ -81,12 +80,12 @@ The trained models demonstrated solid performance in testing:
 
 **Confusion Matrices:**
 
-<img width="384" height="257" alt="image" src="https://github.com/user-attachments/assets/7dbd41a7-75ca-4cfa-b596-e3f168c7c814" /> <img width="384" height="257" alt="image" src="https://github.com/user-attachments/assets/d11595e7-8a0b-4f59-b2ae-9c3cd2410e1d" />
+<img width="384" height="257" alt="image" src="assets/confusion_matrix_cnn.png" /> <img width="384" height="257" alt="image" src="assets/confusion_matrix_yolo.png" />
 
 
 **Precision-Recall Curves:**
 
-<img width="384" height="257" alt="image" src="https://github.com/user-attachments/assets/fa61938a-91d7-4e0a-b011-88a0226d55d6" /> <img width="384" height="257" alt="image" src="https://github.com/user-attachments/assets/fcd49b89-5918-4b0c-8415-f1d7bce74260" />
+<img width="384" height="257" alt="image" src="assets/Precision_Recall_Curves_cnn.png" /> <img width="384" height="257" alt="image" src="assets/Precision_Recall_Curves_yolo.png" />
 
 
 ## Installation & Setup
@@ -127,7 +126,7 @@ To run this project, follow the steps below:
 
 ## Photo examples of detection and classification
 
-<img width="384" height="257" alt="image" src="https://github.com/user-attachments/assets/1da18a81-883e-4b54-9e82-fb7830e9093c" /> <img width="384" height="257" alt="image" src="https://github.com/user-attachments/assets/df82fbe9-8114-493f-ae55-9d16d3b501ca" />
+<img width="384" height="257" alt="image" src="assets/classification_example.png" /> <img width="384" height="257" alt="image" src="assets/detection_example.png" />
 
 
 
